@@ -31,6 +31,7 @@ def run_sac(env_name, n_games=1000):
     env = gym.make(env_name, render_mode="rgb_array")
 
     agent = SACAgent(
+    env_name,
     env.observation_space.shape,
     env.action_space,
     tau=5e-3,

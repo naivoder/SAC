@@ -7,6 +7,7 @@ import memory
 class SACAgent(torch.nn.Module):
     def __init__(
         self,
+        env_name,
         input_dims,
         action_space,
         tau=5e-3,
@@ -42,7 +43,7 @@ class SACAgent(torch.nn.Module):
             self.h1_size,
             self.h2_size,
             learning_rate=self.lr,
-            chkpt_path="weights/critic_1.pt",
+            chkpt_path=f"weights/{env_name}_critic_1.pt",
         )
         self.Q2 = networks.CriticNetwork(
             self.input_dims,
@@ -50,21 +51,21 @@ class SACAgent(torch.nn.Module):
             self.h1_size,
             self.h2_size,
             learning_rate=self.lr,
-            chkpt_path="weights/critic_2.pt",
+            chkpt_path=f"weights/{env_name}_critic_2.pt",
         )
         self.V = networks.ValueNetwork(
             self.input_dims,
             self.h1_size,
             self.h2_size,
             learning_rate=self.lr,
-            chkpt_path="weights/value.pt",
+            chkpt_path=f"weights/{env_name}_value.pt",
         )
         self.V_target = networks.ValueNetwork(
             self.input_dims,
             self.h1_size,
             self.h2_size,
             learning_rate=self.lr,
-            chkpt_path="weights/value_target.pt",
+            chkpt_path=f"weights/{env_name}_value_target.pt",
         )
         self.Actor = networks.ActorNetwork(
             self.input_dims,
@@ -73,7 +74,7 @@ class SACAgent(torch.nn.Module):
             self.h2_size,
             learning_rate=self.lr,
             max_action=self.max_action,
-            chkpt_path="weights/actor.pt",
+            chkpt_path=f"weights/{env_name}_actor.pt",
         )
 
         self.update_network_params(tau=1)
