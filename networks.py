@@ -83,6 +83,7 @@ class ActorNetwork(torch.nn.Module):
         n_actions,
         h1_size,
         h2_size,
+        min_action,
         max_action,
         learning_rate=3e-5,
         reparam_noise=1e-6,
@@ -92,6 +93,7 @@ class ActorNetwork(torch.nn.Module):
         self.h1_size = h1_size
         self.h2_size = h2_size
         self.lr = learning_rate
+        self.min_action = min_action
         self.max_action = max_action
         self.reparam_noise = reparam_noise
         self.checkpoint_path = chkpt_path
@@ -106,26 +108,30 @@ class ActorNetwork(torch.nn.Module):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
 
+        self.action_scale = torch.FloatTensor((self.max_action - self.min_action) / 2.).to(self.device)
+        self.action_bias = torch.FloatTensor((self.max_action + self.min_action) / 2.).to(self.device)
+
     def forward(self, state):
         x = torch.nn.functional.relu(self.fc1(state))
         x = torch.nn.functional.relu(self.fc2(x))
         mean = self.mean(x)
         std = self.std(x)
-        std = torch.clamp(std, self.reparam_noise, 1)
+        std = torch.clamp(std, -20, 2)
         return mean, std
 
-    def sample_normal(self, state, reparam=False):
-        # could also experiment with multivariate normal
-        mu, sigma = self.forward(state)
-        # print(state, mu)
-        action_probs = torch.distributions.Normal(mu, sigma)
-        actions = action_probs.rsample() if reparam else action_probs.sample()
-        action = torch.tanh(actions) * torch.tensor(self.max_action).to(self.device)
+    def sample_normal(self, state):
+        mu, log_std = self.forward(state)
+        std = log_std.exp()
+        probs = torch.distributions.Normal(mu, std)
+        
+        x_t = probs.rsample()  # for reparameterization trick (mean + std * N(0,1))
+        y_t = torch.tanh(x_t)
 
-        # add reparam noise since squared action can = 1 (can't take log of 0)
-        log_probs = action_probs.log_prob(actions)
-        log_probs -= torch.log(1 - action.pow(2) + self.reparam_noise)
-        log_probs = log_probs.sum(-1, keepdim=True)
+        action = y_t * self.action_scale + self.action_bias
+
+        log_probs = probs.log_prob(x_t)
+        log_probs -= torch.log(self.action_scale * (1 - y_t.pow(2)) + self.reparam_noise)
+        log_probs = log_probs.sum(1, keepdim=True)
 
         # for deterministic policy return mu instead of action
         return action, log_probs
