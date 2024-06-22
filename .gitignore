@@ -2,7 +2,8 @@
 *.pt
 weights/*
 environments/*
-results/*
+results/*.csv
+results/*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
