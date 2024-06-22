@@ -27,7 +27,7 @@ environments = [
     "Walker2d-v4",
 ]
 
-def run_sac(env_name, n_games=1000):
+def run_sac(env_name, n_games=10000):
     env = gym.make(env_name, render_mode="rgb_array")
 
     agent = SACAgent(
@@ -35,8 +35,8 @@ def run_sac(env_name, n_games=1000):
     env.observation_space.shape,
     env.action_space,
     tau=5e-3,
-    reward_scale=2,
-    batch_size=64,
+    reward_scale=10,
+    batch_size=256,
     )
 
     best_score = env.reward_range[0]

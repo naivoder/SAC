@@ -11,7 +11,7 @@ class SACAgent(torch.nn.Module):
         input_dims,
         action_space,
         tau=5e-3,
-        reward_scale=2,
+        reward_scale=10,
         batch_size=256,
         lr=3e-4,
         gamma=0.99,
@@ -73,6 +73,7 @@ class SACAgent(torch.nn.Module):
             self.h1_size,
             self.h2_size,
             learning_rate=self.lr,
+            min_action=self.min_action,
             max_action=self.max_action,
             chkpt_path=f"weights/{env_name}_actor.pt",
         )
@@ -81,10 +82,10 @@ class SACAgent(torch.nn.Module):
 
     def choose_action(self, state):
         self.Actor.eval()
-        state = torch.tensor(np.array(state)).to(torch.float32).to(self.Actor.device)
+        state = torch.FloatTensor(state).to(self.Actor.device).unsqueeze(0)
         action, _ = self.Actor.sample_normal(state)
         self.Actor.train()
-        return action.cpu().detach().numpy()
+        return action.cpu().detach().numpy()[0]
 
     def store_transition(self, state, action, reward, next_state, done):
         self.memory.store_transition(state, action, reward, next_state, done)
@@ -96,11 +97,11 @@ class SACAgent(torch.nn.Module):
         states, actions, rewards, next_states, done = self.memory.sample(
             self.batch_size
         )
-        states = torch.tensor(states).to(torch.float32).to(self.Actor.device)
-        next_states = torch.tensor(next_states).to(torch.float32).to(self.Actor.device)
-        actions = torch.tensor(actions).to(torch.float32).to(self.Actor.device)
-        rewards = torch.tensor(rewards).to(torch.float32).to(self.Actor.device)
-        done = torch.tensor(done).to(torch.bool).to(self.Actor.device)
+        states = torch.FloatTensor(states).to(self.Actor.device)
+        next_states = torch.FloatTensor(next_states).to(self.Actor.device)
+        actions = torch.FloatTensor(actions).to(self.Actor.device)
+        rewards = torch.FloatTensor(rewards).to(self.Actor.device)
+        done = torch.BoolTensor(done).to(self.Actor.device)
 
         self._value_loss(states)
         self._actor_loss(states)
@@ -146,7 +147,7 @@ class SACAgent(torch.nn.Module):
         self.V.optimizer.step()
 
     def _actor_loss(self, states):
-        # get min critic value of states with new policy (reparameterized)
+        # get min critic value of states with current policy
         new_policy, log_probs = self.Actor.sample_normal(states)
         log_probs = log_probs.view(-1)
         q1 = self.Q1(states, new_policy)
