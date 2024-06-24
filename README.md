@@ -5,8 +5,6 @@ This repository contains an implementation of Soft Actor-Critic (SAC), a state-o
 
 SAC leverages the advantages of entropy regularization to promote exploration while maintaining a balance between exploration and exploitation. This is achieved through the incorporation of an entropy term in the objective function, encouraging policies to be both high-performing and diverse. The codebase has been evaluated on a variety of standard continuous control environments available in Gymnasium and MuJoCo libraries.
 
->❗Note: Pretty sure there is something wrong with my implementation... Using the reparameterization trick causes an error in the actor network when the mu (mean of action Gaussians) is occasionally all NaN. This only happens on **some** environments, but removing the reparameterization fixes this. I suspect this change is the source of the poor learning, but that is not confirmed. 
-
 ## Setup
 
 ### Required Dependencies
