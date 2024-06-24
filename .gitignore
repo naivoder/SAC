@@ -1,9 +1,6 @@
 .DS_Store
 *.pt
 weights/*
-environments/*
-results/*.csv
-results/*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
