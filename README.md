@@ -164,7 +164,6 @@ SAC significantly outperforms DDPG on a number of environments, notably succeedi
 
 One other consideration: SAC took much, much longer to train than DDPG (~7x) for the same set environments. This could be the result of a suboptimal implementation on my part (let's be honest, this is likely...) or simply the result of the algorithm being more successfull in general - in many environments a successful agent is allowed to operate for extended periods of time before reaching a terminal state.
 
----
 
 ## Acknowledgements
 
