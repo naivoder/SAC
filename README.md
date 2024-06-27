@@ -1,9 +1,7 @@
 # Soft Actor Critic (SAC)
 ## Overview 
 
-This repository contains an implementation of Soft Actor-Critic (SAC), a state-of-the-art deep reinforcement learning algorithm designed for continuous control tasks. Originally proposed in the paper ["Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor" by Haarnoja et al](https://arxiv.org/abs/1801.01290), SAC enhances traditional actor-critic methods by integrating ideas from maximum entropy reinforcement learning and stochastic policies.  
-
-SAC leverages the advantages of entropy regularization to promote exploration while maintaining a balance between exploration and exploitation. This is achieved through the incorporation of an entropy term in the objective function, encouraging policies to be both high-performing and diverse. The codebase has been evaluated on a variety of standard continuous control environments available in Gymnasium and MuJoCo libraries.
+This repository contains an implementation of Soft Actor-Critic (SAC), a state-of-the-art deep reinforcement learning algorithm designed for continuous control tasks. Originally proposed in the paper ["Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor" by Haarnoja et al](https://arxiv.org/abs/1801.01290), SAC leverages the advantages of entropy regularization to promote exploration while maintaining a balance between exploration and exploitation. This is achieved through the incorporation of an entropy term in the objective function, encouraging policies to be both high-performing and diverse. The codebase has been evaluated on a variety of standard continuous control environments available in Gymnasium and MuJoCo libraries.
 
 ## Setup
 
@@ -23,7 +21,8 @@ You can run the algorithm on any supported Gymnasium environment. For example:
 python main.py --env 'LunarLanderContinuous-v2'
 ```
 
---- 
+## Environments
+No hyper-parameter tuning was performed for these benchmarks. This was an intentional strategy to compare the general performance of the algorithm across different kinds of tasks. As such, there are some examples where the agent failed to effectively learn, and others where the agent was still learning after 10k episodes.  
 
 <table>
     <tr>
@@ -161,7 +160,11 @@ python main.py --env 'LunarLanderContinuous-v2'
     </tr>
 </table>
 
+SAC significantly outperforms DDPG on a number of environments, notably succeeding in the BipedalWalker-v3 where DDPG failed to effectively learn. Perhaps most interesting, in my opinion, is the failure to learn the MountainCarContinuous environment; for all intents and purposes this is a much easier task, but due to the extremely sparse nature of the rewards it appears the SAC policy fails to regularly discover the reward state and propogate that information effectively. This could potentially be solved using something like prioritized experience replay to reinforce the effect of those reward states when they are encountered. 
 
+One other consideration: SAC took much, much longer to train than DDPG (~7x) for the same set environments. This could be the result of a suboptimal implementation on my part (let's be honest, this is likely...) or simply the result of the algorithm being more successfull in general - in many environments a successful agent is allowed to operate for extended periods of time before reaching a terminal state.
+
+---
 
 ## Acknowledgements
 
